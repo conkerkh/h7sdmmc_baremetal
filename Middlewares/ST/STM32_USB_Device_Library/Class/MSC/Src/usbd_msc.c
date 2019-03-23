@@ -328,10 +328,10 @@ uint8_t  USBD_MSC_Init (USBD_HandleTypeDef *pdev,
                    USBD_EP_TYPE_BULK,
                    MSC_MAX_FS_PACKET);
   }
-  pdev->pClassData = USBD_malloc(sizeof (USBD_MSC_BOT_HandleTypeDef));
-  pdev->pClassData = (void*)0x24000000;
+  pdev->pMSC_ClassData = USBD_malloc(sizeof (USBD_MSC_BOT_HandleTypeDef));
+  pdev->pMSC_ClassData = (void*)0x24000000;
 
-  if(pdev->pClassData == NULL)
+  if(pdev->pMSC_ClassData == NULL)
   {
     ret = 1;
   }
@@ -368,10 +368,10 @@ uint8_t  USBD_MSC_DeInit (USBD_HandleTypeDef *pdev,
   MSC_BOT_DeInit(pdev);
 
   /* Free MSC Class Resources */
-  if(pdev->pClassData != NULL)
+  if(pdev->pMSC_ClassData != NULL)
   {
-    USBD_free(pdev->pClassData);
-    pdev->pClassData  = NULL;
+    USBD_free(pdev->pMSC_ClassData);
+    pdev->pMSC_ClassData  = NULL;
   }
   return 0;
 }
@@ -384,7 +384,7 @@ uint8_t  USBD_MSC_DeInit (USBD_HandleTypeDef *pdev,
 */
 uint8_t  USBD_MSC_Setup (USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 {
-  USBD_MSC_BOT_HandleTypeDef     *hmsc = (USBD_MSC_BOT_HandleTypeDef*) pdev->pClassData;
+  USBD_MSC_BOT_HandleTypeDef     *hmsc = (USBD_MSC_BOT_HandleTypeDef*) pdev->pMSC_ClassData;
 
   switch (req->bmRequest & USB_REQ_TYPE_MASK)
   {
@@ -399,7 +399,7 @@ uint8_t  USBD_MSC_Setup (USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
          (req->wLength == 1) &&
          ((req->bmRequest & 0x80) == 0x80))
       {
-        hmsc->max_lun = ((USBD_StorageTypeDef *)pdev->pUserData)->GetMaxLun();
+        hmsc->max_lun = ((USBD_StorageTypeDef *)pdev->pMSC_UserData)->GetMaxLun();
         USBD_CtlSendData (pdev,
                           (uint8_t *)&hmsc->max_lun,
                           1);
@@ -588,7 +588,7 @@ uint8_t  USBD_MSC_RegisterStorage  (USBD_HandleTypeDef   *pdev,
 {
   if(fops != NULL)
   {
-    pdev->pUserData= fops;
+    pdev->pMSC_UserData= fops;
   }
   return 0;
 }
