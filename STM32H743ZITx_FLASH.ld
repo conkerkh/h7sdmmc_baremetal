@@ -118,7 +118,7 @@ SECTIONS
   _sidata = LOADADDR(.data);
 
   /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data : 
+  .data :
   {
     . = ALIGN(4);
     _sdata = .;        /* create a global symbol at data start */
@@ -129,7 +129,7 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
   } >DTCMRAM AT> FLASH
 
-  
+
   /* Uninitialized data section */
   . = ALIGN(4);
   .bss :
@@ -157,7 +157,35 @@ SECTIONS
     . = ALIGN(8);
   } >DTCMRAM
 
-  
+  .ram_d1 :
+  {
+    . = ALIGN(4);
+    _s_ram_d1 = .;
+    *(.ram_d1)
+    *(.ram_d1*)
+    . = ALIGN(4);
+    _e_ram_d1 = .;
+  } > RAM_D1
+
+    .ram_d2 :
+  {
+    . = ALIGN(4);
+    _s_ram_d2 = .;
+    *(.ram_d2)
+    *(.ram_d2*)
+    . = ALIGN(4);
+    _e_ram_d2 = .;
+  } > RAM_D2
+
+    .ram_d3 :
+  {
+    . = ALIGN(4);
+    _s_ram_d3 = .;
+    *(.ram_d3)
+    *(.ram_d3*)
+    . = ALIGN(4);
+    _e_ram_d3 = .;
+  } > RAM_D3
 
   /* Remove information from the standard libraries */
   /DISCARD/ :

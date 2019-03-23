@@ -165,26 +165,7 @@ int main(void)
   //MX_SDMMC1_SD_Init();
   /* USER CODE BEGIN 2 */
   MPU_Config();
-  SD_Initialize_LL(SDMMC1);
-  SD_Init(0x03);
-  memset(temp, 0, 512);
-  uint32_t start = HAL_GetTick();
-  for (int i = 0; i < 4096; i++) {
-      SD_ReadBlocks_DMA(512 * i, temp, 512, 1);
-      while (SD_CheckRead());
-      while (SD_GetState() == false);
-  }
-  uint32_t writeTime = HAL_GetTick() - start;
-  float transferSpeed = 512.0f * 4096.0f / 1024.0f / 1024.0f / ((float)writeTime / 1000);
-
-  start = HAL_GetTick();
-  for (int i = 0; i < 10; i++) {
-      SD_ReadBlocks_DMA(512 * i, temp, 512, 512);
-      while (SD_CheckRead());
-      while (SD_GetState() == false);
-  }
-  writeTime = HAL_GetTick() - start;
-  transferSpeed = 512.0f * 512.0f * 10.0f / 1024.0f / 1024.0f / ((float)writeTime / 1000);
+  run_sdmmc_test();
 
   HAL_PWREx_EnableUSBVoltageDetector();
   /* USER CODE END 2 */
