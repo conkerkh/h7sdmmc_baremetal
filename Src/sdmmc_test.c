@@ -10,6 +10,7 @@
 #include "stm32h7xx_hal.h"
 #include "sdmmc_sdio.h"
 #include "unity.h"
+#include "us_handler.h"
 
 #define SD_BUFFER __attribute__((section(".ram_d1"), aligned(4)))
 uint8_t SD_BUFFER buffer_in[512 * 64];
@@ -31,9 +32,10 @@ uint64_t cardsize = 0;
 
 void _init_sdmmc(void) {
     bool ret = true;
-    SD_Initialize_LL(SDMMC1);
+    DWT_Init();
+    SD_Initialize_LL(SDMMC2);
     TEST_ASSERT_TRUE(ret);
-    SD_Init(0x01);
+    SD_Init(0x03);
     rng_init();
     TEST_ASSERT_TRUE(ret);
     TEST_ASSERT(SD_OK == SD_GetCardInfo());

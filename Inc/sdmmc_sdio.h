@@ -211,22 +211,69 @@ typedef struct
   uint32_t             CardBlockSize;   // Card block size
 } SD_CardInfo_t;
 
-#define uSD_D0_Pin GPIO_PIN_8
-#define uSD_D0_GPIO_Port GPIOC
+#define SDMMC_4BIT
+
+// SDMMC1 PINS
+#define SDMMC1_D0_Pin GPIO_PIN_8
+#define SDMMC1_D0_GPIO_Port GPIOC
+#define SDMMC1_D0_CLK RCC_AHB4ENR_GPIOCEN
 #ifdef SDMMC_4BIT
-#define uSD_D1_Pin GPIO_PIN_9
-#define uSD_D1_GPIO_Port GPIOC
-#define uSD_D2_Pin GPIO_PIN_10
-#define uSD_D2_GPIO_Port GPIOC
-#define uSD_D3_Pin GPIO_PIN_11
-#define uSD_D3_GPIO_Port GPIOC
+#define SDMMC1_D1_Pin GPIO_PIN_9
+#define SDMMC1_D1_GPIO_Port GPIOC
+#define SDMMC1_D1_CLK RCC_AHB4ENR_GPIOCEN
+#define SDMMC1_D2_Pin GPIO_PIN_10
+#define SDMMC1_D2_GPIO_Port GPIOC
+#define SDMMC1_D2_CLK RCC_AHB4ENR_GPIOCEN
+#define SDMMC1_D3_Pin GPIO_PIN_11
+#define SDMMC1_D3_GPIO_Port GPIOC
+#define SDMMC1_D3_CLK RCC_AHB4ENR_GPIOCEN
 #endif
-#define uSD_CLK_Pin GPIO_PIN_12
-#define uSD_CLK_GPIO_Port GPIOC
-#define uSD_CMD_Pin GPIO_PIN_2
-#define uSD_CMD_GPIO_Port GPIOD
-#define uSD_DETECT_Pin GPIO_PIN_3
-#define uSD_DETECT_GPIO_Port GPIOD
+#define SDMMC1_CLK_Pin GPIO_PIN_12
+#define SDMMC1_CLK_GPIO_Port GPIOC
+#define SDMMC1_CLK_CLK RCC_AHB4ENR_GPIOCEN
+#define SDMMC1_CMD_Pin GPIO_PIN_2
+#define SDMMC1_CMD_GPIO_Port GPIOD
+#define SDMMC1_CMD_CLK RCC_AHB4ENR_GPIODEN
+
+// SDMMC2 PINS - AF9
+#define SDMMC2_D0_Pin GPIO_PIN_14
+#define SDMMC2_D0_GPIO_Port GPIOB
+#define SDMMC2_D0_CLK RCC_AHB4ENR_GPIOBEN
+#ifdef SDMMC_4BIT
+#define SDMMC2_D1_Pin GPIO_PIN_15
+#define SDMMC2_D1_GPIO_Port GPIOC
+#define SDMMC2_D1_CLK RCC_AHB4ENR_GPIOCEN
+#define SDMMC2_D2_Pin GPIO_PIN_3
+#define SDMMC2_D2_GPIO_Port GPIOB
+#define SDMMC2_D2_CLK RCC_AHB4ENR_GPIOBEN
+#define SDMMC2_D3_Pin GPIO_PIN_4
+#define SDMMC2_D3_GPIO_Port GPIOB
+#define SDMMC2_D3_CLK RCC_AHB4ENR_GPIOBEN
+#endif
+#define SDMMC2_CLK_Pin GPIO_PIN_1
+#define SDMMC2_CLK_GPIO_Port GPIOC
+#define SDMMC2_CLK_CLK RCC_AHB4ENR_GPIOCEN
+#define SDMMC2_CMD_Pin GPIO_PIN_0
+#define SDMMC2_CMD_GPIO_Port GPIOA
+#define SDMMC2_CMD_CLK RCC_AHB4ENR_GPIOAEN
+
+// AF10
+//#define SDMMC2_D2_Pin GPIO_PIN_11
+//#define SDMMC2_D2_GPIO_Port GPIOG
+// AF11
+//#define SDMMC2_CLK_Pin GPIO_PIN_6
+//#define SDMMC2_CLK_GPIO_Port GPIOD
+// AF11
+//#define SDMMC2_CMD_Pin GPIO_PIN_7
+//#define SDMMC2_CMD_GPIO_Port GPIOD
+
+
+
+
+
+
+#define SDMMC_DETECT_Pin GPIO_PIN_3
+#define SDMMC_DETECT_GPIO_Port GPIOD
 
 /* Prototype(s) -----------------------------------------------------------------------------------------------------*/
 
