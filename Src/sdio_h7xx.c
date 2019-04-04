@@ -174,13 +174,14 @@ typedef enum
 
 typedef struct
 {
-    uint32_t          CSD[4];           // SD card specific data table
-    uint32_t          CID[4];           // SD card identification number table
-    volatile uint32_t TransferComplete; // SD transfer complete flag in non blocking mode
-    volatile uint32_t TransferError;    // SD transfer error flag in non blocking mode
-    volatile uint32_t RXCplt;		   // SD RX Complete is equal 0 when no transfer
-    volatile uint32_t TXCplt;		   // SD TX Complete is equal 0 when no transfer
-    volatile uint32_t Operation;        // SD transfer operation (read/write)
+    uint32_t          CSD[4];            // SD card specific data table
+    uint32_t          CID[4];            // SD card identification number table
+    volatile uint32_t TransferComplete;  // SD transfer complete flag in non blocking mode
+    volatile uint32_t TransferError;     // SD transfer error flag in non blocking mode
+    volatile uint32_t RXCplt;		     // SD RX Complete is equal 0 when no transfer
+    volatile uint32_t TXCplt;		     // SD TX Complete is equal 0 when no transfer
+    volatile uint32_t Operation;         // SD transfer operation (read/write)
+    volatile uint32_t last_transfer_end; // Holds no of cycles when last trasfer ended
 } SD_Handle_t;
 
 typedef enum
@@ -204,6 +205,7 @@ static uint32_t                    SD_Status;
 static uint32_t                    SD_CardRCA;
 SD_CardType_t                      SD_CardType;
 SDMMC_TypeDef                      *sdmmc_instance;
+static uint32_t                    sdmmc8_clk_cycles;
 
 
 /* Private function(s) ----------------------------------------------------------------------------------------------*/
@@ -447,8 +449,17 @@ static SD_Error_t SD_InitializeCard(void)
   * @param  NumberOfBlocks: Number of blocks to write
   * @retval SD Card error state
   */
+static inline uint32_t cyccnt_delta(uint32_t new, uint32_t old) {
+    uint32_t delta_t = new - old;
+    if ((int32_t)delta_t < 0) {
+        delta_t += UINT32_MAX;
+    }
+    return delta_t;
+}
+
 static void SD_StartBlockTransfer(uint32_t BlockSize, uint32_t NumberOfBlocks, uint8_t dir)
 {
+    while (cyccnt_delta(DWT->CYCCNT, SD_Handle.last_transfer_end) < sdmmc8_clk_cycles);
     sdmmc_instance->DCTRL      = 0;                                                                 // Initialize data control register
     SD_Handle.TransferComplete = 0;                                                                 // Initialize handle flags
     SD_Handle.TransferError    = SD_OK;
@@ -494,6 +505,18 @@ static void SD_DataTransferInit(uint32_t Size, uint32_t DataBlockSize, bool IsIt
     sdmmc_instance->DCTRL |= DataBlockSize;
     sdmmc_instance->DCTRL |=  (uint32_t)(Direction | enableDPSM);
     return;
+}
+
+void SD_MDMA_ReadConfig(uint32_t addr, uint32_t dest, uint32_t len) {
+    MDMA_Channel0->CCR = MDMA_PRIORITY_VERY_HIGH | MDMA_LITTLE_ENDIANNESS_PRESERVE;
+
+    MDMA_Channel0->CTCR = MDMA_SRC_INC_BYTE | MDMA_DEST_INC_BYTE | MDMA_SRC_DATASIZE_BYTE | MDMA_DEST_DATASIZE_BYTE;
+    MDMA_Channel0->CTCR |= MDMA_DATAALIGN_LEFT | MDMA_SOURCE_BURST_SINGLE | MDMA_DEST_BURST_SINGLE | MDMA_FULL_TRANSFER;
+    // Buffer transfer len of 8
+    MDMA_Channel0->CTCR |= ((8 - 1) << POSITION_VAL(MDMA_CTCR_TLEN));
+
+    MDMA_Channel0->CTCR |= (MDMA_CTCR_SWRM | MDMA_CTCR_BWM);
+
 }
 
 
@@ -1170,7 +1193,7 @@ SD_Error_t SD_GetCardStatus(SD_CardStatus_t* pCardStatus)
 {
     SD_Error_t ErrorState;
     uint32_t   Temp = 0;
-    uint32_t   Status[16];
+    uint32_t   Status[16] = {0};
     uint32_t   Count;
 
     // Check SD response
@@ -1579,6 +1602,8 @@ bool SD_Init(uint8_t clk_div)
 
     }
 
+    sdmmc8_clk_cycles = SystemCoreClock / 50000000 * 8 * (clk_div * 2);
+
     // Configure the SDCARD device
     return ErrorState;
 }
@@ -1632,6 +1657,7 @@ static inline void SDMMC_IRQHandler(void) {
 
         SD_Handle.TransferComplete = 1;
         SD_Handle.TransferError = SD_OK;       // No transfer error
+        SD_Handle.last_transfer_end = DWT->CYCCNT;
     }
     else if ((status & SDMMC_STA_IDMATE) != 0) {
         sdmmc_instance->IDMACTRL &= ~(SDMMC_IDMA_IDMAEN);
